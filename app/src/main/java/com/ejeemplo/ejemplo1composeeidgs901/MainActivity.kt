@@ -135,7 +135,7 @@ fun Personajes(personaje: PersonajeTarjeta) {
 
         )
     }
-
+}
     @Composable
     fun ImagenHeroe(ImageName: String) {
         val contex = LocalContext.current
@@ -179,4 +179,3 @@ fun Personajes(personaje: PersonajeTarjeta) {
             SaludoCard("Android", "Personaje")
         }
     }
-}

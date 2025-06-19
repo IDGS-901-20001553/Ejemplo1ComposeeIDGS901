@@ -2,29 +2,47 @@ package com.ejeemplo.ejemplo1composeeidgs901
 
 import android.app.Person
 import android.icu.text.CaseMap.Title
+import android.media.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 
 private val tarjetas: List<PersonajeTarjeta> = listOf(
     PersonajeTarjeta("Goku","El protagonista de la serie, conocido por su gran poder y personalidad amigable. Originalmente enviado a la Tierra como un infante volador con la misión de conquistarla. Sin embargo, el caer por un barranco le proporcionó un brutal golpe que si bien casi lo mata, este alteró su memoria y anuló todos los instintos violentos de su especie, lo que lo hizo crecer con un corazón puro y bondadoso, pero conservando todos los poderes de su raza. No obstante, en la nueva continuidad de Dragon Ball se establece que él fue enviado por sus padres a la Tierra con el objetivo de sobrevivir a toda costa a la destrucción de su planeta por parte de Freeza. Más tarde, Kakarot, ahora conocido como Son Goku, se convertiría en el príncipe consorte del monte Fry-pan y líder de los Guerreros Z, así como el mayor defensor de la Tierra y del Universo 7, logrando mantenerlos a salvo de la destrucción en innumerables ocasiones, a pesar de no considerarse a sí mismo como un héroe o salvador."),
@@ -48,7 +66,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Ejemplo1ComposeeIDGS901Theme {
-                SaludoCard("Android", "personaje")
+                tarjeta(tarjetas)
             }
         }
     }
@@ -58,7 +76,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun tarjeta(personajes: List<PersonajeTarjeta>){
     LazyColumn {
-        items(personajes){personaje
+        items(personajes){personaje ->
         MyPersonajes(personaje)
         }
     }
@@ -66,60 +84,99 @@ fun tarjeta(personajes: List<PersonajeTarjeta>){
 
 @Composable
 fun MyPersonajes(personaje:PersonajeTarjeta){
-    Row {
-        ImagenPersonaje(personaje.title.lowercase())
-            Personajes(personaje)
-    }
-}
 
-
-@Composable
-fun Personajes(personaje: PersonajeTarjeta){
-    Column {
-        Personaje(personaje.title)
-        Personaje(personaje.body)
-
-
-}
-
-@Composable
-fun Personaje(datos:String){
-    Text(datos)
-} }
-
-
-@Composable
-fun ImagenPersonaje(name: String){
-    Image(
-        painter = painterResource(id = R.drawable.blue),
-        contentDescription = "Android Logo",
+    Card(
         modifier = Modifier
-            .padding(8.dp)
-            .size(100.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary)
-    )
+            .padding(16.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
 
-
-}
-@Composable
-fun SaludoCard(name: String, datosCard: String) {
-    Row {
-
-        Column {
-            Text("Nombre: $name"
-            )
-
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text("DatosCard: $datosCard")
+        Row(
+            modifier = Modifier.padding(8.dp)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            ImagenHeroe(personaje.title)
+            Personajes(personaje)
         }
     }
 }
 
-@Preview
+
+
 @Composable
-fun PreviewSaludoCard() {
+fun Personaje(name: String,color: Color,style: TextStyle, lines:Int=Int.MAX_VALUE){
+    Text(text = name, color= color, style = style, maxLines = lines)
 
-        SaludoCard(name = "Android", datosCard = "personaje de prueba")
 
+}
+
+@Composable
+fun Personajes(personaje: PersonajeTarjeta) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.padding(start = 8.dp).clickable {
+            expanded = !expanded
+        }
+    ) {
+        Personaje(
+            personaje.title,
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.typography.headlineMedium
+        )
+
+        Personaje(
+            personaje.body,
+            MaterialTheme.colorScheme.onBackground,
+            MaterialTheme.typography.bodyLarge,
+            if (expanded) Int.MAX_VALUE else 1
+
+        )
+    }
+
+    @Composable
+    fun ImagenHeroe(ImageName: String) {
+        val contex = LocalContext.current
+        val ImageResId = remember(ImageName) {
+            contex.resources.getIdentifier(
+                ImageName.lowercase(),
+                "drawable", contex.packageName
+            )
+        }
+        Image(
+            painter = painterResource(id = ImageResId),
+            contentDescription = null,
+            modifier = Modifier
+                .padding(16.dp)
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary)
+        )
+
+    }
+
+    @Composable
+    fun SaludoCard(name: String, datosCard: String) {
+        Row {
+
+            Column {
+                Text(
+                    "Nombre: $name"
+                )
+
+                Spacer(modifier = Modifier.padding(8.dp))
+                Text("DatosCard: $datosCard")
+            }
+        }
+    }
+
+    @Preview
+    @Composable
+    fun PreviwSaludoCard(){
+        Column {
+            SaludoCard("Android", "Personaje")
+        }
+    }
 }
